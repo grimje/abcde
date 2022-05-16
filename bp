@@ -1,0 +1,56 @@
+import pandas as pd
+import numpy as np
+df = pd.read_csv("../data/Iris.csv")
+df = df.iloc[[1, 51, 101]]
+
+df.head()
+y = pd.get_dummies(df.species).values
+N = y.size
+x = df.drop(["Id", "species"], axis=1).values
+
+print(y)
+print()
+print(x)
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+learning_rate = 0.1
+
+n_input = 4
+n_hidden = 2
+n_output = 3
+np.random.seed(10)
+
+weights_1 = np.random.normal(scale=0.5, size=(n_input, n_hidden))   # (4, 2)
+weights_2 = np.random.normal(scale=0.5, size=(n_hidden, n_output))  # (2, 3)
+# feedforward
+hidden_layer_inputs = np.dot(x, weights_1)
+hidden_layer_outputs = sigmoid(hidden_layer_inputs)
+
+output_layer_inputs = np.dot(hidden_layer_outputs, weights_2)
+output_layer_outputs = sigmoid(output_layer_inputs)
+
+# backpropagation
+output_layer_error = output_layer_outputs - y
+output_layer_delta = output_layer_error * output_layer_outputs * (1 - output_layer_outputs)
+
+hidden_layer_error = np.dot(output_layer_delta, weights_2.T)
+hidden_layer_delta = hidden_layer_error * hidden_layer_outputs * (1 - hidden_layer_outputs)
+
+# weight updates
+weights_2_update = np.dot(hidden_layer_outputs.T, output_layer_delta) / N
+weights_1_update = np.dot(x.T, hidden_layer_delta) / N
+
+weights_2 = weights_2 - learning_rate * weights_2_update
+weights_1 = weights_1 - learning_rate * weights_1_update
+mse = ((output_layer_outputs - y)**2).sum() / (2*N)
+mse
+
+
+# feedforward
+hidden_layer_inputs = np.dot(x, weights_1)
+hidden_layer_outputs = sigmoid(hidden_layer_inputs)
+
+output_layer_inputs = np.dot(hidden_layer_outputs, weights_2)
+output_layer_outputs = sigmoid(output_layer_inputs)
+mse = ((output_layer_outputs - y)**2).sum() / (2*N)
+mse
